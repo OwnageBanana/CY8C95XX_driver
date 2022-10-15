@@ -1,5 +1,7 @@
 # CY8C95XXA Driver
 
+**PLEASE NOTE THIS IS A WORK IN PROGRESS**
+
 This driver supports the CY8C95XXA IO Expander chips from Cypress Perform, tested on the rp2040.
 
 A simple I2C(IIC) driver that enables reads and writes to the registers for configuring the device.
