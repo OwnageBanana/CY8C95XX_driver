@@ -8,8 +8,11 @@
 //!
 //! Note that in its unconfigured state tha the chip is in quasi-bidirectional mode, meaning pins are high and the un-grounded state of
 //! the pins will reflect as a 1 in the input register which simply reflects the logic level on the pin.
-//! For this example we are reading the first 3 pins of the gpio bank 0 and blink the pico led for each `1` we read.
-//! if you ground physically any of these pins then you will read a 0 and the led will not blink.
+//!
+//! For this example we are writing the first 2 gpio port banks' interrupt masks (port0 and 1) and reading the interrupt status registers
+//! if you physically ground any of these pins in the first 2 banks then you will read a corrisponding byte value to which pins were grounded
+//! and the led will flash to reflect the status registers were not zero. aditionally if you put a probe to the INT pin you will read
+//! and interrupt. Finally if you attempt any of this on any other gpio bank you will see that nothing will happen with the led or on the INT pin.
 //!
 //!
 //! See the `Cargo.toml` file for Copyright and license details.
@@ -106,25 +109,31 @@ fn main() -> ! {
 
     // in the case of this example A0 is pulled strong high, setting our soft address to 1
     let mut device = Cy8c95xx::new(&mut i2c, 1);
+    let mut read_buf: [u8; 1] = [0; 1];
+    // note that port select is used to set the interrupt mask for corresponding port banks
+    device.write_read_mp(&[CY8C95XX_Reg::INT_MASK as u8, 0x00], &mut read_buf);
+    device.write_read_mp(&[CY8C95XX_Reg::PORT_SELECT as u8, 0x01], &mut read_buf);
+    device.write_read_mp(&[CY8C95XX_Reg::INT_MASK as u8, 0x00], &mut read_buf);
+    device.write_read_mp(&[CY8C95XX_Reg::PORT_DIR_IO as u8, 0xff], &mut read_buf);
 
     let mut pico_led = pins.gpio25.into_push_pull_output();
     loop {
-        device.read_io().unwrap();
-        let port = CY8C95XX_Reg::INPUT_PORT_0 as usize;
-        if device.regs[port] & 1 != 0 {
-            pico_led.set_high().unwrap();
-        }
-        delay.delay_ms(500);
-        pico_led.set_low().unwrap();
-        delay.delay_ms(500);
-        if device.regs[port] & 2 != 0 {
-            pico_led.set_high().unwrap();
-        }
-        delay.delay_ms(500);
-        pico_led.set_low().unwrap();
-        delay.delay_ms(500);
+        device.read_all_regs();
 
-        if device.regs[port] & 4 != 0 {
+        let t: [u8; 2] = [
+            device.regs[CY8C95XX_Reg::INT_STATUS_PORT_0 as usize],
+            device.regs[CY8C95XX_Reg::INT_STATUS_PORT_1 as usize],
+        ];
+
+        device.read_io().unwrap();
+        // let port = CY8C95XX_Reg::INPUT_PORT_0 as usize;
+        if t[0] != 0 {
+            pico_led.set_high().unwrap();
+        }
+        delay.delay_ms(500);
+        pico_led.set_low().unwrap();
+        delay.delay_ms(500);
+        if t[1] != 0 {
             pico_led.set_high().unwrap();
         }
         delay.delay_ms(500);

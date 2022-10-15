@@ -28,13 +28,13 @@ where
     pub fn new(i2c: &'a mut I2C, soft_addr: u8) -> Self {
         let mut mp_addr = MP_D_ADDR;
         if soft_addr <= 31 {
-            mp_addr |= soft_addr << 1;
+            mp_addr |= soft_addr;
         } else {
             mp_addr = soft_addr;
         }
         let mut eeprom_addr = MP_D_ADDR;
         if soft_addr <= 64 {
-            eeprom_addr |= soft_addr << 1;
+            eeprom_addr |= soft_addr;
         } else {
             eeprom_addr = soft_addr;
         }
@@ -65,25 +65,45 @@ where
             &mut self.regs[CY8C95XX_Reg::DEVICE_INFO.into()..end_reg],
         )
     }
-
+    // reads all input port registers and writes the the reg property at addresses where input port register address corrispond
+    pub fn read_all_regs(&mut self) -> Result<(), E> {
+        self.i2c.write_read(
+            self.mp_addr,
+            &[CY8C95XX_Reg::INPUT_PORT_0 as u8],
+            &mut self.regs
+                [CY8C95XX_Reg::INPUT_PORT_0 as usize..CY8C95XX_Reg::DRIVE_MODE_HIGH_Z as usize + 1],
+        );
+        // skipping the reserved registers
+        self.i2c.write_read(
+            self.mp_addr,
+            &[CY8C95XX_Reg::PWM_SELECT as u8], //first reg
+            &mut self.regs[CY8C95XX_Reg::PWM_SELECT as usize..],
+        )
+    }
+    // reads all input port registers and writes the the reg property at addresses where input port register address corrispond
+    pub fn read_all_int_status(&mut self) -> Result<(), E> {
+        let end_reg: usize = CY8C95XX_Reg::INT_STATUS_PORT_7 as usize + 1;
+        self.i2c.write_read(
+            self.mp_addr,
+            &[CY8C95XX_Reg::INPUT_PORT_0 as u8], //first reg
+            &mut self.regs[CY8C95XX_Reg::INT_STATUS_PORT_0 as usize..end_reg],
+        )
+    }
     // reads all input port registers and writes the the reg property at addresses where input port register address corrispond
     pub fn read_io(&mut self) -> Result<(), E> {
-        // + (soft_address << 1) + Read/Write bit
-        let device_addr = MP_D_ADDR + (self.soft_addr);
-        // let mut answer = [0];
         self.i2c.write_read(
-            device_addr,
+            self.mp_addr,
             &[CY8C95XX_Reg::INPUT_PORT_0 as u8],
             &mut self.regs
                 [CY8C95XX_Reg::INPUT_PORT_0 as usize..CY8C95XX_Reg::INPUT_PORT_7 as usize + 1],
         )
-        // .and(Ok(answer[0]))
     }
 
-    // basically a simple passthrough of the i2c write_read function
+    /// basically a simple passthrough of the i2c write_read function
     pub fn write_read_mp(&mut self, write_buf: &[u8], read_buf: &mut [u8]) -> Result<(), E> {
         self.i2c.write_read(self.mp_addr, write_buf, read_buf)
     }
+    /// basically a simple passthrough of the i2c write_read function
     pub fn write_read_eeprom(&mut self, write_buf: &[u8], read_buf: &mut [u8]) -> Result<(), E> {
         self.i2c.write_read(self.eeprom_addr, write_buf, read_buf)
     }

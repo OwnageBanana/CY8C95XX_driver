@@ -30,11 +30,11 @@ pub enum CY8C95XX_Reg {
     INT_STATUS_PORT_6,
     INT_STATUS_PORT_7,
     // one off regs
-    PORT_SELECT = 0x18,             // default 00h
+    PORT_SELECT = 0x18,             // default 00h used to select corrisponding ports for regs 0x19 - 0x23
     INT_MASK = 0x19,                // default FFh
     PWM_SELECT_OUT_PORT = 0x1A,     // default 00h
     INVERSION = 0x1B,               // default 00h
-    PIN_DIR_IO = 0x1c,              // default 00h
+    PORT_DIR_IO = 0x1c,             // default 00h output
     DRIVE_MODE_PULL_UP = 0x1D,      // default FFh
     DRIVE_MODE_PULL_DOWN = 0x1E,    // default 00h
     DRIVE_MODE_OPEN_DRAIN_H = 0x1F, // default 00h
