@@ -21,5 +21,6 @@ embedded-time = "0.12.1"
 nb = "1.0.0"
 fugit = "0.3.6"
 
+shared-bus = "0.2.4"
 
 # Cy8c95xx_driver = { path = "./" }

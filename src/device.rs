@@ -5,8 +5,8 @@ const MP_D_ADDR: u8 = 0x10 << 1;
 const EEPROM_D_ADDR: u8 = 0x28 << 1;
 
 // provides a utility set of functions for reading from the device
-pub struct Cy8c95xx<'a, I2C> {
-    i2c: &'a mut I2C,
+pub struct Cy8c95xx<I2C> {
+    i2c: I2C,
     soft_addr: u8,
     mp_addr: u8,     // 7 bit addresses
     eeprom_addr: u8, // 7 bit addresses
@@ -21,11 +21,11 @@ pub struct Cy8c95xx<'a, I2C> {
     pub regs: [u8; 0x30], // value of the last register COMMAND in here we store any results from the registers
 }
 
-impl<'a, I2C, E> Cy8c95xx<'a, I2C>
+impl<I2C, E> Cy8c95xx<I2C>
 where
     I2C: WriteRead<Error = E>,
 {
-    pub fn new(i2c: &'a mut I2C, soft_addr: u8) -> Self {
+    pub fn new(i2c: I2C, soft_addr: u8) -> Self {
         let mut mp_addr = MP_D_ADDR;
         if soft_addr <= 31 {
             mp_addr |= soft_addr;
