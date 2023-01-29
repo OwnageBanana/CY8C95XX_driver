@@ -10,7 +10,7 @@
 //! the pins will reflect as a 1 in the input register which reflects the logic level on the pin.
 //!
 //! For this example we are reading the first 3 pins (io 0, 1, 2) of the gpio bank 0 and blink the pico led for each `1` we read.
-//! if you ground physically any of these pins then you will read a 0 and the led will not blink.
+//! if you physically ground any of these pins then you will read a 0 and the led will not blink.
 //!
 //!
 //! See the `Cargo.toml` file for Copyright and license details.
