@@ -6,7 +6,7 @@
 //!
 //! example works on any rp2040 device which exposes i2c1  gpio8 and gpio9 / (physical) pin11 and pin12
 //!
-//! Note that in its reconfigured state that the chip is in quasi-bidirectional mode, meaning pins are high and the un-grounded state of
+//! Note that in its un-configured state that the chip is in quasi-bidirectional mode, meaning pins are high and the un-grounded state of
 //! the pins will reflect as a 1 in the input register which reflects the logic level on the pin.
 //!
 //! For this example we are reading the first 3 pins (io 0, 1, 2) of the gpio bank 0 and blink the pico led for each `1` we read.
@@ -100,7 +100,7 @@ fn main() -> ! {
         pac.I2C0,
         sda_pin,
         scl_pin, // Try `not_an_scl_pin` here
-        100.kHz(),
+        100.kHz(), //try reducing the clock if things don't seem to work right off the bat
         &mut pac.RESETS,
         &clocks.system_clock,
     );
